@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pulsekit"
+authors = [
+    {name = "Esteban Leiva", email = "e.leivam@uniandes.edu.co"},
+]
+version = "0.0.0"
