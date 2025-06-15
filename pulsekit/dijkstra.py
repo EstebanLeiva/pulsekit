@@ -1,6 +1,6 @@
 import heapq
 import numpy as np
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 from pulsekit.graph import Graph
 
@@ -72,20 +72,19 @@ def dijkstra_between_nodes(
         A list of node IDs representing the shortest path from start to target.
         Returns an empty list if no path exists.
     """
-    reversed_graph = graph.reverse_graph()
-    n = len(reversed_graph.nodes)
+    n = len(graph.nodes)
     cost = np.full((n,), float('inf'))
-    cost[target_node] = 0.0
-    queue = [(0.0, target_node)]
+    cost[start_node] = 0.0
+    queue = [(0.0, start_node)]
     predecessors = np.full((n,), -1)
 
     while len(queue) > 0:
         current_cost, current_node = heapq.heappop(queue)
-        if current_cost > cost[current_node]:
-            continue
         if current_node == target_node:
             break
-        for neighbor, link in reversed_graph.nodes[current_node].links.items():
+        if current_cost > cost[current_node]:
+            continue
+        for neighbor, link in graph.nodes[current_node].links.items():
             if rand_var:
                 link_cost = link.random[rand_var][cost_key]
             else:
@@ -96,10 +95,10 @@ def dijkstra_between_nodes(
                 predecessors[neighbor] = current_node
                 heapq.heappush(queue, (new_cost, neighbor))
     path = []
-    u= target_node
+    u = target_node
     if predecessors[u] != -1 or u == start_node:
         while u != -1:
             path.append(u)
             u = predecessors[u]
     path.reverse()
-    return path, cost[start_node]
+    return path, cost[target_node]

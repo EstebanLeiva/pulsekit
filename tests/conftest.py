@@ -22,6 +22,14 @@ def pulse_graph_instance():
     Pytest fixture to create a reusable Graph instance for pulse tests.
     """
     g = Graph()
+    g.create_node("1")
+    g.create_node("2")
+    g.create_node("3")
+    g.create_node("4")
+    g.create_node("5")
+    g.create_node("s")
+    g.create_node("e")
+    
     g.add_link("s", "1", 
                deterministic={"cost": 2.0}, 
                random={"time": {"mean": 2.0, "variance": 3.0}})
