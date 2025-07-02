@@ -1,6 +1,7 @@
+import heapq
+import numpy as np
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Any, Optional, Callable
-import heapq
 from collections import defaultdict
 from pulsekit.graph import Graph, Link
 from pulsekit.dijkstra import dijkstra
@@ -38,6 +39,8 @@ class Parameters:
     pulse_score: Callable
     exploration_order: Callable
     pruning_functions: List[Callable]
+    initial_path: Optional[List[int]] = field(default_factory=list)
+    initial_objective: float = np.inf
 
 @dataclass
 class Preprocessing:
@@ -110,6 +113,10 @@ class Pulse:
         self.current_optimal_objective: float = float('inf')
         self.instance_info: Dict[str, int] = defaultdict(int)
 
+        if self.parameters.initial_path:
+            self.current_optimal_path = self.parameters.initial_path
+            self.current_optimal_objective = self.parameters.initial_objective
+
     def _order_nodes(self, link_dict: Dict[int, Link]) -> List[int]:
         """Sorts neighboring nodes based on the exploration_order function."""
         return sorted(link_dict.keys(), key=lambda node_idx: self.parameters.exploration_order(self, node_idx))
@@ -123,7 +130,7 @@ class Pulse:
         for cost in self.parameters.prep_deterministic_weights:
             costs_from_target = dijkstra(graph, target, cost_key=cost)
             self.preprocessing.deterministic[cost] = costs_from_target
-            if costs_from_target[source] == float('inf'):
+            if costs_from_target[source] == np.inf:
                 raise RuntimeError("Source node not reachable from target")
 
         for rand_var, costs in self.parameters.prep_random_weights.items():
@@ -131,7 +138,7 @@ class Pulse:
             for cost in costs:
                 costs_from_target = dijkstra(graph, target, rand_var=rand_var, cost_key=cost)
                 self.preprocessing.random[rand_var][cost] = costs_from_target
-                if costs_from_target[source] == float('inf'):
+                if costs_from_target[source] == np.inf:
                     raise RuntimeError("Source node not reachable from target")
 
     def _propagate_pulse(
@@ -159,6 +166,7 @@ class Pulse:
                     ordered_reachable_nodes = self._order_nodes(link_dict)
                     for reachable_node in ordered_reachable_nodes:
                         if reachable_node not in current_path_info.path:
+                            print(f"Exploring node {reachable_node} from {current_node} at depth {current_depth}")
                             new_path = current_path_info.path.copy()
                             new_determistic_info, new_random_info = self.parameters.info_update(self.parameters.graph,
                                                                                                 current_node,

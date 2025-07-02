@@ -29,3 +29,6 @@ def test_dijkstra_between_nodes(pulse_graph_instance):
         v = expected_path[i + 1]
         expected_cost += pulse_graph_instance.nodes[u].links[v].deterministic["cost"]
     assert cost == expected_cost, f"Cost mismatch: expected {expected_cost}, got {cost}"
+
+    costs = dijkstra(pulse_graph_instance, target_node=target_node, cost_key="cost")
+    assert costs[start_node] == cost, f"Cost from start node {start_node} to target node {target_node} should match the path cost, expected {cost}, got {costs[start_node]}"

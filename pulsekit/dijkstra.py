@@ -1,7 +1,6 @@
 import heapq
 import numpy as np
 from typing import List, Optional, Tuple
-
 from pulsekit.graph import Graph
 
 def dijkstra(
@@ -29,7 +28,7 @@ def dijkstra(
     """
     reversed_graph = graph.reverse_graph()
     n = len(reversed_graph.nodes)
-    cost = np.full((n,), float('inf'))
+    cost = np.full((n,), np.inf)
     cost[target_node] = 0.0
     queue = [(0.0, target_node)]
     predecessors = np.full((n,), -1)
@@ -73,7 +72,7 @@ def dijkstra_between_nodes(
         Returns an empty list if no path exists.
     """
     n = len(graph.nodes)
-    cost = np.full((n,), float('inf'))
+    cost = np.full((n,), np.inf)
     cost[start_node] = 0.0
     queue = [(0.0, start_node)]
     predecessors = np.full((n,), -1)
